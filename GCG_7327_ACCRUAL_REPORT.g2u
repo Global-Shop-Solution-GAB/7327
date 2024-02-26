@@ -1,0 +1,198 @@
+﻿Program.Sub.ScreenSU.Start
+Gui.F_MAIN..Create(BaseForm)
+Gui.F_MAIN..Caption("Inventory Accrual Export")
+Gui.F_MAIN..Size(445,98)
+Gui.F_MAIN..MinX(0)
+Gui.F_MAIN..MinY(0)
+Gui.F_MAIN..Position(0,0)
+Gui.F_MAIN..AlwaysOnTop(False)
+Gui.F_MAIN..FontName("Tahoma")
+Gui.F_MAIN..FontSize(8.25)
+Gui.F_MAIN..ControlBox(True)
+Gui.F_MAIN..MaxButton(True)
+Gui.F_MAIN..MinButton(True)
+Gui.F_MAIN..MousePointer(0)
+Gui.F_MAIN..Moveable(True)
+Gui.F_MAIN..Sizeable(True)
+Gui.F_MAIN..ShowInTaskBar(True)
+Gui.F_MAIN..TitleBar(True)
+Gui.F_MAIN..Event(UnLoad,F_MAIN_UnLoad)
+Gui.F_MAIN.dtpStartDate.Create(DatePicker)
+Gui.F_MAIN.dtpStartDate.Enabled(True)
+Gui.F_MAIN.dtpStartDate.Visible(True)
+Gui.F_MAIN.dtpStartDate.Zorder(0)
+Gui.F_MAIN.dtpStartDate.Size(100,20)
+Gui.F_MAIN.dtpStartDate.Position(128,29)
+Gui.F_MAIN.dtpStartDate.CheckBox(False)
+Gui.F_MAIN.dtpStartDate.FontName("Tahoma")
+Gui.F_MAIN.dtpStartDate.FontSize(8.25)
+Gui.F_MAIN.dtpEndDate.Create(DatePicker)
+Gui.F_MAIN.dtpEndDate.Enabled(True)
+Gui.F_MAIN.dtpEndDate.Visible(True)
+Gui.F_MAIN.dtpEndDate.Zorder(0)
+Gui.F_MAIN.dtpEndDate.Size(100,20)
+Gui.F_MAIN.dtpEndDate.Position(237,29)
+Gui.F_MAIN.dtpEndDate.CheckBox(False)
+Gui.F_MAIN.dtpEndDate.FontName("Tahoma")
+Gui.F_MAIN.dtpEndDate.FontSize(8.25)
+Gui.F_MAIN.lblStartDate.Create(Label,"Enter Start Date",True,92,13,0,128,12,True,0,"Tahoma",8.25,,0,0)
+Gui.F_MAIN.lblStartDate.BorderStyle(0)
+Gui.F_MAIN.lblStartDate.FontStyle(True,False,False,False,False)
+Gui.F_MAIN.lblEndDate.Create(Label,"Enter End Date",True,83,13,0,237,12,True,0,"Tahoma",8.25,,0,0)
+Gui.F_MAIN.lblEndDate.BorderStyle(0)
+Gui.F_MAIN.lblEndDate.FontStyle(True,False,False,False,False)
+Gui.F_MAIN.ddlCompanyLocation.Create(DropDownList)
+Gui.F_MAIN.ddlCompanyLocation.Enabled(True)
+Gui.F_MAIN.ddlCompanyLocation.Visible(True)
+Gui.F_MAIN.ddlCompanyLocation.Zorder(0)
+Gui.F_MAIN.ddlCompanyLocation.Size(100,20)
+Gui.F_MAIN.ddlCompanyLocation.Position(18,29)
+Gui.F_MAIN.ddlCompanyLocation.FontName("Tahoma")
+Gui.F_MAIN.ddlCompanyLocation.FontSize(8.25)
+Gui.F_MAIN.lblCompanyLocation.Create(Label,"Company Location",True,104,13,0,18,12,True,0,"Tahoma",8.25,,0,0)
+Gui.F_MAIN.lblCompanyLocation.BorderStyle(0)
+Gui.F_MAIN.lblCompanyLocation.FontStyle(True,False,False,False,False)
+Gui.F_MAIN.cmdExport.Create(Button)
+Gui.F_MAIN.cmdExport.Enabled(True)
+Gui.F_MAIN.cmdExport.Visible(True)
+Gui.F_MAIN.cmdExport.Zorder(0)
+Gui.F_MAIN.cmdExport.Size(88,34)
+Gui.F_MAIN.cmdExport.Position(347,15)
+Gui.F_MAIN.cmdExport.Caption("Export")
+Gui.F_MAIN.cmdExport.FontName("Tahoma")
+Gui.F_MAIN.cmdExport.FontSize(8.25)
+Gui.F_MAIN.cmdExport.FontStyle(True,False,False,False,False)
+Gui.F_MAIN.cmdExport.Event(Click,Export)
+Gui.F_MAIN.GsGcMain.Create(GsGridControl)
+Gui.F_MAIN.GsGcMain.Enabled(True)
+Gui.F_MAIN.GsGcMain.Visible(False)
+Gui.F_MAIN.GsGcMain.Zorder(0)
+Gui.F_MAIN.GsGcMain.Size(67,34)
+Gui.F_MAIN.GsGcMain.Position(446,14)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+Function.Intrinsic.UI.UsePixels ' Allows you to use Pixels instead of Twips throughout
+F.Intrinsic.Control.Try
+'TJS, October 2023
+'Customer:  Manufacturing Resource Group
+'Quote: 14347
+'Business Case: MRG wants to be able to send a monthly export of all their accrual related invoices that have been posted to the GL in GSS. They need to send the data for both their company locations (US and Mexico) to their parent company. They want to be able to select a date range defaulted to a month and be able to generate the report from either company location. This report will generate in an EXCEL format and will contain records for both company locations.
+V.Local.dStartDate.Declare
+
+Gui.F_MAIN.ddlCompanyLocation.AddItem("ALL")
+Gui.F_MAIN.ddlCompanyLocation.AddItem("MEX")
+Gui.F_MAIN.ddlCompanyLocation.AddItem("USA")
+
+Gui.F_MAIN.ddlCompanyLocation.ListIndex(0)
+
+F.Intrinsic.Date.DateAdd("d",-30,V.Ambient.Date,V.Local.dStartDate)
+
+Gui.F_MAIN.dtpStartDate.Value(V.Local.dStartDate)
+
+Gui.F_MAIN..Show
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(Error,"SubRoutine",V.Ambient.CurrentSubroutine,"ErrorLine",V.Ambient.ErrorLine,"eNumber",V.Ambient.ErrorNumber,"eDescription",V.Ambient.ErrorDescription)
+F.Intrinsic.Control.EndTry
+Program.Sub.Main.End
+
+Program.Sub.Export.Start
+F.Intrinsic.Control.Try
+V.Local.sSQL.Declare
+V.Local.sExportPath.Declare
+V.Local.sAppend.Declare
+V.Local.bCheck.Declare
+
+F.Automation.MSExcel.CheckPresence(V.Local.bCheck)
+
+F.Intrinsic.Control.If(V.Local.bCheck.Not)
+	F.Intrinsic.UI.Msgbox("Microsoft Excel not detected","Cannot Export")
+	F.Intrinsic.Control.CallSub(F_MAIN_UnLoad)
+F.Intrinsic.Control.EndIf
+
+F.Intrinsic.UI.ShowSaveFileDialog("","xlsx|*.xlsx",V.Local.sExportPath)
+
+F.Intrinsic.Control.SelectCase(V.Screen.F_MAIN!ddlCompanyLocation.Value)
+	F.Intrinsic.Control.Case("ALL")
+		V.Local.sAppend.Set("and E.LOCATION in ('MX','US')")
+	F.Intrinsic.Control.Case("MEX")
+		V.Local.sAppend.Set("and E.LOCATION = 'MX'")
+	F.Intrinsic.Control.Case("USA")
+		V.Local.sAppend.Set("and E.LOCATION = 'US'")
+F.Intrinsic.Control.EndSelect
+
+F.Intrinsic.String.Build("Select 'MRG' as COCODE,'Manufacturing Resource Group' as NAME_COMPANY,Case when E.LOCATION = 'US' then 'USA' when E.LOCATION = 'MX' then 'MEX' else '' end as COUNTRY_COMPANY,A.VENDOR,B.NAME_VENDOR,A.RECEIVER,A.PO_LINE as DOC_LINE_NUMBER,A.DATE_BATCH,A.INVOICE,A.DATE_INVOICE,A.DATE_INVOICE_DUE,A.AMT_INVOICE,A.PAYMENT_CURR,A.GL_ACCOUNT,C.DESCR,Case when E.LOCATION = 'US' then 'EN' when E.LOCATION = 'MX' then 'ES' else '' end as CODE_LANGUAGE,'Global Shop Solutions' as NAME_ERP,A.PURCHASE_ORDER,A.PO_LINE,D.DATE_ORDER,E.PART,E.DESCRIPTION,E.PART_MFG_NO,E.MFG_NAME,F.QTY_INVOICED,E.UM_INVENTORY from V_AP_OPEN_ITEMS A left join V_VENDOR_MASTER B on A.VENDOR = B.VENDOR left join V_GL_MASTER C on A.GL_ACCOUNT = C.GL_ACCOUNT left join V_PO_HEADER D on A.PURCHASE_ORDER = D.PURCHASE_ORDER left join V_PO_LINES E on A.PURCHASE_ORDER = E.PURCHASE_ORDER left join V_PO_RECEIVER F on A.RECEIVER = F.RECEIVER_NO where A.BATCH_CODE = 9 and A.DATE_BATCH between '{0}' and '{1}' {2};",V.Screen.F_MAIN!dtpStartDate.Value.PervasiveDate,V.Screen.F_MAIN!dtpEndDate.Value.PervasiveDate,V.Local.sAppend,V.Local.sSQL)
+
+F.ODBC.Connection!conts.OpenCompanyConnection
+	F.Data.DataTable.CreateFromSQL("dtExport","conts",V.Local.sSQL)
+F.ODBC.Connection!conts.Close
+
+'Gridview is hidden from the user and is only there to provide an export structure.
+Gui.F_MAIN.GsGcMain.AddGridviewFromDatatable("gvExport","dtExport")
+Gui.F_MAIN.GsGcMain.MainView("gvExport")
+V.Local.sTemp.Declare
+V.Local.sTemp.Set(V.DataTable.dtExport.FieldNames)
+
+F.Intrinsic.Control.CallSub(BulkFormatting,"Form","F_MAIN","GV","gvExport","GSGC","GsGcMain","Cols",V.DataTable.dtExport.FieldNames,"Vals","Company Code*!*Company Name*!*Company Country*!*Vendor Number*!*Vendor Name*!*Document Number*!*Document Line Number*!*Posting Date*!*Invoice Number*!*Invoice Date*!*Invoice Due Date*!*Line Spend in Purchasing Currency*!*Purchasing Currency (Code)*!*GL Account Number*!*GL Account Name*!*Language Code*!*Data Source Name*!*Purchase Order Number*!*Purchase Order Line Number*!*PO Date*!*Material Number*!*Material Name*!*Material Group Number*!*Material Group Name*!*Invoice Quantity*!*Invoice Quantity UOM","Prop",V.Enum.ColumnPropertyNames!Caption)
+
+Gui.F_MAIN.GsGcMain.Export(V.Local.sExportPath,"xlsx")
+
+F.Intrinsic.UI.Msgbox("Export complete")
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(Error,"SubRoutine",V.Ambient.CurrentSubroutine,"ErrorLine",V.Ambient.ErrorLine,"eNumber",V.Ambient.ErrorNumber,"eDescription",V.Ambient.ErrorDescription)
+F.Intrinsic.Control.EndTry
+Program.Sub.Export.End
+
+Program.Sub.BulkFormatting.Start
+F.Intrinsic.Control.Try
+V.Local.sCol.Declare
+V.Local.sVal.Declare
+V.Local.iCnt.Declare
+V.Local.iVI.Declare
+
+F.Intrinsic.String.Split(V.Args.Cols,"*!*",V.Local.sCol)
+F.Intrinsic.String.Split(V.Args.Vals,"*!*",V.Local.sVal)
+
+F.Intrinsic.Control.For(V.Local.iCnt,V.Local.sCol.UBound)
+	F.Intrinsic.Control.If(V.Local.sCol.UBound,=,V.Local.sVal.UBound)
+		Gui.[V.Args.Form].[V.Args.GSGC].SetColumnProperty(V.Args.GV,V.Local.sCol(V.Local.iCnt),V.Args.Prop,V.Local.sVal(V.Local.iCnt))
+	F.Intrinsic.Control.ElseIf(V.Args.Prop,=,V.Enum.ColumnPropertyNames!VisibleIndex)
+		Gui.[V.Args.FORM].[V.Args.GSGC].SetColumnProperty(V.Args.GV,V.Local.sCol(V.Local.iCnt),V.Args.Prop,V.Local.iVI.++)
+	F.Intrinsic.Control.Else
+		Gui.[V.Args.FORM].[V.Args.GSGC].SetColumnProperty(V.Args.GV,V.Local.sCol(V.Local.iCnt),V.Args.Prop,V.Local.sVal)	
+	F.Intrinsic.Control.EndIf
+F.Intrinsic.Control.Next(V.Local.iCnt)
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(Error,"SubRoutine",V.Ambient.CurrentSubroutine,"eNumber",V.Ambient.ErrorNumber,"eDescription",V.Ambient.ErrorDescription)
+F.Intrinsic.Control.EndTry
+Program.Sub.BulkFormatting.End
+
+Program.Sub.F_MAIN_UnLoad.Start
+F.Intrinsic.Control.End
+Program.Sub.F_MAIN_UnLoad.End
+
+Program.Sub.Error.Start
+V.Local.sError.Declare
+V.Local.iRet.Declare
+V.Local.sSep.Declare
+V.Local.sScript.Declare
+
+F.Intrinsic.String.Split(V.Caller.ScriptFile,"\",V.Local.sScript)
+V.Local.sScript.Set(V.Local.sScript(V.Local.sScript.UBound))
+V.Local.sScript.RedimPreserve(0,0)
+
+F.Intrinsic.String.Build("-------------------------------------------------------------------------------------",,V.Local.sSep)
+F.Intrinsic.String.Build("{5} {6}{0}{7}{0}Project: {4}{0}{7}{0}Sub: {1}{0}Line:{8}{0}Error: {2}, {3}", V.Ambient.NewLine, V.Args.SubRoutine, V.Args.eNumber, V.Args.eDescription,V.Local.sScript,V.Ambient.Date, V.Ambient.Time,V.Local.sSep,V.Args.ErrorLine,V.Local.sError)
+F.Intrinsic.UI.Msgbox(V.Local.sError,"Error",V.Local.iRet)
+Program.Sub.Error.End
+
+Program.Sub.Comments.Start
+${$5$}$20.1.8693.27812$}$1
+${$6$}$tsmith$}$20231030121211346$}$xqPbj9atw05FglvzeFsZ9cqXP+qvG6tX6fLh8ZdVt5mKwUmfQGKlw1WIT8dcgHhBCKPTiEkI18k=
+Program.Sub.Comments.End
